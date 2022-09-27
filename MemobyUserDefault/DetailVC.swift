@@ -9,13 +9,21 @@ import Foundation
 import UIKit
 
 struct Memo: Codable {
+    let memoDate: String
     let memoTitle: String
     let memoContents: String
-    let memoDate: Date
+}
+
+struct Lists: Codable {
+    let memos: [Memo]
 }
 
 class DetailVC: UIViewController {
     override func viewDidLoad() {
+        memoData = MainVC.list?.memos[indexRow ?? 0]
+        titleDetailTextField.text = memoData?.memoTitle
+        contentsDetailTextView.text = memoData?.memoContents
+
     }
     
     let defaults = UserDefaults.standard
@@ -25,21 +33,40 @@ class DetailVC: UIViewController {
     @IBOutlet weak var contentsDetailTextView: UITextView!
     @IBOutlet weak var updateButton: UIButton!
     
+    var memoData: Memo?
+    var indexRow: Int?
+    var memoTitle: String?
+    var memoContents: String?
+    var memoDate: String?
+    
     @IBAction func updateButtonTapped(_ sender: Any) {
-        if let title = titleDetailTextField.text {
-            var memo = Memo(memoTitle: title, memoContents: contentsDetailTextView.text, memoDate: Date())
+        var value: String = ""
+        var date = Date()
+        var dateFormatter = DateFormatter()
+        var hours = (Calendar.current.component(.hour, from: date))
+        var minutes = (Calendar.current.component(.minute, from: date))
+        var seconds = (Calendar.current.component(.second, from: date))
+        if let titleText = titleDetailTextField.text {
+            dateFormatter.dateFormat = "dd/MM/yyyy"
+            var today = dateFormatter.string(from: date)
+            memoDate = "\(today), \(hours):\(minutes):\(seconds)"
+            var memo = Memo(memoDate: memoDate ?? "", memoTitle: titleText, memoContents: contentsDetailTextView.text)
             do {
-                //JSON Encoder 생성
-                let encoder = JSONEncoder()
-                
                 //Encode Memo
-                let data = try encoder.encode(memo)
+                let jsonData = try JSONEncoder().encode(MainVC.list)
+                value = String(data: jsonData, encoding: .utf8) ?? ""
+                print(value)
+                defaults.set(jsonData, forKey: "memo") //"memo"키로 값 저장
             } catch {
-                print("Unable to Encode Note due to \(error)")
+                print("Unable to Encode/Decode Note due to \(error)")
             }
-            
         }
-
-        defaults
+        
+        
+        defaults.synchronize() //동기화
+    }
+    //다른 곳을 터치하면 키보드 내리기
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
     }
 }

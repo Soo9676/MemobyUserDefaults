@@ -38,7 +38,7 @@
                                 <rect key="frame" x="0.0" y="88" width="414" height="774"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="OOA-Dm-rFd" customClass="MemoTableViewCell" customModule="MemobyUserDefault" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="MemoCell" id="OOA-Dm-rFd" customClass="MemoTableViewCell" customModule="MemobyUserDefault" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="44.5" width="414" height="125"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="OOA-Dm-rFd" id="hgZ-DO-0Ch">
@@ -135,6 +135,10 @@
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="AS3-g8-L1F"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="TnO-f4-T26"/>
+                                </connections>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -146,10 +150,17 @@
                             <constraint firstItem="GQe-Nd-Ez4" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="dCZ-pH-Psd"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="SSh-NW-hap"/>
+                    <navigationItem key="navigationItem" id="SSh-NW-hap">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="1bo-ty-ZUx">
+                            <connections>
+                                <action selector="tapAddButton:" destination="BYZ-38-t0r" id="Uta-N4-BJA"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="MemoTableView" destination="GQe-Nd-Ez4" id="CJH-c4-4HM"/>
-                        <segue destination="Fss-Q2-xdp" kind="show" id="R32-nq-tbO"/>
+                        <outlet property="addButton" destination="1bo-ty-ZUx" id="yDd-Pp-0KL"/>
+                        <segue destination="Fss-Q2-xdp" kind="show" identifier="SegueToDeatailVC" id="R32-nq-tbO"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

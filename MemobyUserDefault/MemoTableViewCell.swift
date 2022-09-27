@@ -26,31 +26,24 @@ class MemoTableViewCell: UITableViewCell {
     @IBOutlet weak var memoContentsLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var updateButton: UIButton!
+    
+    var memoTitle: String?
+    var memoContents: String?
+    var memoDate: String? {
+        didSet {
+            configureUIwithData()
+        }
+    }
+    
     let defaults = UserDefaults.standard
+    var indexRow: Int?
     
     //Read/Get Data
-    if let data = UserDefaults.standard.data(forKey: "memo"){
-        //JSON Decoder 생성
-        let decoder = JSONDecoder()
-        //Decode Memo
-        let memo = try decoder.decode(Memo.self, from: data)
-    } catch {
-        print("Unable to Decode Memo due to \(error)")
+    func configureUIwithData() {
+        memoTitleLabel.text = memoTitle
+        memoContentsLabel.text = memoContents
+        dateLabel.text = memoDate
     }
+        
 }
 
-extension MemoTableViewCell: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        <#code#>
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        <#code#>
-    }
-    
-    
-}
-
-extension MemoTableViewCell: UITableViewDelegate {
-    
-}
