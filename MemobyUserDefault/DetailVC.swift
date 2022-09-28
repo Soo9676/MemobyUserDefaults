@@ -18,6 +18,7 @@ struct Lists: Codable {
     let memos: [Memo]
 }
 
+
 class DetailVC: UIViewController {
     override func viewDidLoad() {
         memoData = MainVC.list?.memos[indexRow ?? 0]
@@ -40,7 +41,8 @@ class DetailVC: UIViewController {
     var memoDate: String?
     
     @IBAction func updateButtonTapped(_ sender: Any) {
-        var value: String = ""
+        var jsonString: String = ""
+        var valueArray:[String] = []
         var date = Date()
         var dateFormatter = DateFormatter()
         var hours = (Calendar.current.component(.hour, from: date))
@@ -53,10 +55,24 @@ class DetailVC: UIViewController {
             var memo = Memo(memoDate: memoDate ?? "", memoTitle: titleText, memoContents: contentsDetailTextView.text)
             do {
                 //Encode Memo
-                let jsonData = try JSONEncoder().encode(MainVC.list)
-                value = String(data: jsonData, encoding: .utf8) ?? ""
-                print(value)
-                defaults.set(jsonData, forKey: "memo") //"memo"키로 값 저장
+                let encodedData = try JSONEncoder().encode(memo)
+                jsonString = String(data: encodedData, encoding: .utf8) ?? ""
+                MainVC.list?.memos.append(memo)
+                //MARK: print
+                print("입력된 jsonString:\(jsonString)")
+                //"memo"키로 값불러와서 비었는지 확인
+                if let value = defaults.value(forKey: "memo") {
+                    //value에 jsonString 추가
+                    print("기존 value(forKey: 'memo'): \(value)")
+                } else {
+                    valueArray.append(jsonString)
+                    print(valueArray)
+                }
+                //"memo"키로 값 저장
+                defaults.setValue(MainVC.list, forKey: "memo")
+                print("userdefault에 저장 완료")
+                
+                self.navigationController?.popViewController(animated: true)
             } catch {
                 print("Unable to Encode/Decode Note due to \(error)")
             }

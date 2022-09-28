@@ -13,7 +13,7 @@ class MainVC: UIViewController {
         super.viewDidLoad()
         let defaults = UserDefaults.standard
         do {
-            if let jsonData = UserDefaults.standard.data(forKey: "Memo") {
+            if let jsonData = UserDefaults.standard.data(forKey: "memo") {
                 MainVC.list = try JSONDecoder().decode(Lists.self, from: jsonData)
             }
         } catch { print(error)}
@@ -26,7 +26,7 @@ class MainVC: UIViewController {
     @IBOutlet weak var addButton: UIBarButtonItem!
     
     static var list: Lists?
-    var memos: [Memo] = []
+//    var memos: [Memo] = []
     static var dates: [Date] = []
     
     @IBAction func tapAddButton(_ sender: Any) {
