@@ -29,7 +29,8 @@ class MemoTableViewCell: UITableViewCell {
     
     var memoTitle: String?
     var memoContents: String?
-    var memoDate: String? {
+    var memoDate: String?
+    var memoData: [String] = []{
         didSet {
             configureUIwithData()
         }
@@ -38,12 +39,25 @@ class MemoTableViewCell: UITableViewCell {
     let defaults = UserDefaults.standard
     var indexRow: Int?
     
+    var updateButtonPressed: (MemoTableViewCell) -> Void = { (sender) in }
+    
     //Read/Get Data
     func configureUIwithData() {
-        memoTitleLabel.text = memoTitle
-        memoContentsLabel.text = memoContents
-        dateLabel.text = memoDate
+//        memoTitle =
+//        memoContents =
+//        memoDate =
+        
+        memoTitleLabel.text = String(memoData[0])
+        memoContentsLabel.text = String(memoData[1])
+        dateLabel.text = String(memoData[2])
     }
+    
+    @IBAction func tapUpdateButton(_ sender: Any) {
+        // 뷰컨트롤로에서 전달받은 클로저를 실행 (내 자신 ToDoCell을 전달하면서) ⭐️
+        updateButtonPressed(self)
+    }
+    
+    
         
 }
 

@@ -8,7 +8,11 @@
 import UIKit
 
 class MainVC: UIViewController {
-
+    
+    override func viewWillAppear(_ animated: Bool) {
+            MemoTableView.reloadData()
+        }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         let defaults = UserDefaults.standard
@@ -25,7 +29,7 @@ class MainVC: UIViewController {
     @IBOutlet weak var MemoTableView: UITableView!
     @IBOutlet weak var addButton: UIBarButtonItem!
     
-    static var list: Lists?
+    static var list: Lists = Lists()
 //    var memos: [Memo] = []
     static var dates: [Date] = []
     
@@ -39,20 +43,23 @@ class MainVC: UIViewController {
 
 extension MainVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return memos.count
+        return MainVC.list.memos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MemoCell", for: indexPath) as! MemoTableViewCell
-        var decodedMemo = MainVC.list?.memos[indexPath.row]
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MemoCell", for: indexPath) as? MemoTableViewCell else {return UITableViewCell()}
+        var decodedMemo = MainVC.list.memos[indexPath.row]
+        var memoData = [decodedMemo.memoTitle, decodedMemo.memoContents, decodedMemo.memoDate]
         cell.indexRow = indexPath.row
-        cell.memoTitle = decodedMemo?.memoTitle
-        cell.memoContents = decodedMemo?.memoContents
-        cell.memoDate = decodedMemo?.memoDate
         //셀에 모델 전달
-        let defaults = UserDefaults.standard
+        cell.memoData = memoData
         
-        return UITableViewCell()
+        //셀의 update 버튼이 눌렸을때 작동할 클로저
+        cell.updateButtonPressed = { [weak self] (senderCell) in
+            // 뷰컨트롤러에 있는 세그웨이의 실행
+            self?.performSegue(withIdentifier: "SegueToDeatailVC", sender: indexPath)
+        }
+        return cell
     }
     
     
@@ -66,12 +73,37 @@ extension MainVC: UITableViewDelegate {
         
     }
     
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+            if editingStyle == .delete {
+                // delete your item here and reload table view
+                MainVC.list.memos.remove(at: indexPath.row)
+                MemoTableView.deleteRows(at: [indexPath], with: .fade)
+                
+                do {
+                    //Encode Memo
+                    let encodedData = try JSONEncoder().encode(MainVC.list)
+                    //"memo"키로 값 저장
+                    UserDefaults.standard.setValue(encodedData, forKey: "memo")
+                    UserDefaults.standard.synchronize()//동기화
+                    var value = UserDefaults.standard.value(forKey: "memo")
+                    print("갱신된 userdefault(forKey: memo): \(value)")
+                } catch {
+                    print("error:\(error)")
+                }
+            }
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "SegueToDeatailVC" {
             let detailVC = segue.destination as! DetailVC
             guard let indexPath = sender as? IndexPath else {return}
+            detailVC.memoList = MainVC.list.memos
+            detailVC.indexRow = indexPath.row
 //            var decodedMemo = MainVC.list?.memos[indexPath.row]
 //            detailVC.memoData = decodedMemo
+//            detailVC.callbackResult = { result in
+//                self.MemoTableView.reloadData()
+            }
         }
     }
-}
+
