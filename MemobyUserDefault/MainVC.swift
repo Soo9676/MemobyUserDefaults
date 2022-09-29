@@ -30,8 +30,7 @@ class MainVC: UIViewController {
     @IBOutlet weak var addButton: UIBarButtonItem!
     
     static var list: Lists = Lists()
-//    var memos: [Memo] = []
-    static var dates: [Date] = []
+    var memoDateList: [String?] = []
     
     @IBAction func tapAddButton(_ sender: Any) {
         performSegue(withIdentifier: "SegueToDeatailVC", sender: nil)
@@ -49,7 +48,7 @@ extension MainVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "MemoCell", for: indexPath) as? MemoTableViewCell else {return UITableViewCell()}
         var decodedMemo = MainVC.list.memos[indexPath.row]
-        var memoData = [decodedMemo.memoTitle, decodedMemo.memoContents, decodedMemo.memoDate]
+        var memoData = [decodedMemo.memoTitle, decodedMemo.memoContents, decodedMemo.memoDateforAdmin, decodedMemo.memoDateforUser]
         cell.indexRow = indexPath.row
         //셀에 모델 전달
         cell.memoData = memoData
@@ -97,12 +96,9 @@ extension MainVC: UITableViewDelegate {
         if segue.identifier == "SegueToDeatailVC" {
             let detailVC = segue.destination as! DetailVC
             guard let indexPath = sender as? IndexPath else {return}
-            detailVC.memoList = MainVC.list.memos
+            detailVC.memoDateList = self.memoDateList
+            print("디테일VC -> 메인VC : 메모날짜 리스트 전달 완료")
             detailVC.indexRow = indexPath.row
-//            var decodedMemo = MainVC.list?.memos[indexPath.row]
-//            detailVC.memoData = decodedMemo
-//            detailVC.callbackResult = { result in
-//                self.MemoTableView.reloadData()
             }
         }
     }
