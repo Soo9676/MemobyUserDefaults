@@ -23,15 +23,16 @@ struct Lists: Codable {
 class DetailVC: UIViewController {
     override func viewDidLoad() {
         setup()
+        
     }
     
     func setup(){
+        var memoRange = 0...memoDateList.count
         if let row = indexRow, memoRange.contains(row){
-            memoData = MainVC.list.memos[row]
+            print(memoData)
             titleDetailTextField.text = memoData?.memoTitle
             contentsDetailTextView.text = memoData?.memoContents
             updateButton.setTitle("update", for: .normal)
-            
             self.title = "메모 수정하기"
         } else {
             titleDetailTextField.placeholder = "새로운 메모를 입력하세요"
@@ -41,7 +42,6 @@ class DetailVC: UIViewController {
         }
     }
     
-    
     let defaults = UserDefaults.standard
     @IBOutlet weak var titleDetailView: UIView!
     @IBOutlet weak var titleDetailTextField: UITextField!
@@ -49,17 +49,18 @@ class DetailVC: UIViewController {
     @IBOutlet weak var contentsDetailTextView: UITextView!
     @IBOutlet weak var updateButton: UIButton!
     
-    var memoDateList: [String?] = []
+    var memoDateList: [String] = []
+    var newDateArray: [String] = []
     var memoData: Memo?
     var indexRow: Int?
+            
     var memoTitle: String?
     var memoContents: String?
     var memoDateforAdmin: String = "memoDateforAdmin"
     var memoDateforUser: String = "memoDateforUser"
-    var memoRange = 0...MainVC.list.memos.count
-//    var callbackResult: (() -> ())?
-    
+
     @IBAction func updateButtonTapped(_ sender: Any) {
+        var memoRange = 0...memoDateList.count
         var jsonString: String = ""
         var valueArray:[String] = []
         var titleText = titleDetailTextField.text
@@ -72,16 +73,17 @@ class DetailVC: UIViewController {
 //
 //        }
         
-        var memo = Memo(memoDateforAdmin: memoDateforAdmin, memoDateforUser: memoDateforAdmin, memoTitle: titleDetailTextField.text ?? "", memoContents: contentsDetailTextView.text )
+        var memo = Memo(memoDateforAdmin: memoDateforAdmin, memoDateforUser: memoDateforUser, memoTitle: titleDetailTextField.text ?? "", memoContents: contentsDetailTextView.text )
         print("현재 시각: \(memoDateforAdmin)")
         print("입력한 메모: \(memo)")
         
-        if let row = indexRow, memoRange.contains(row){
+        if let row = indexRow, memoRange.contains(row) { //수정화면이라면 입력
             memoDateList[row]  = memo.memoDateforAdmin
-        } else {
-            memoDateList.append(memo.memoDateforAdmin)
+        } else { // 생성화면이라면 입력
+            
+            newDateArray = memoDateList + [memo.memoDateforAdmin]
+            print("DetailVC.memoDateList = \(memoDateList)")
         }
-        print("입력한 메모 추가된 날짜 리스트: \(memoDateList)")
         
         do {
             //Encode Memo
@@ -89,12 +91,16 @@ class DetailVC: UIViewController {
             //"memo"키로 값 저장
             defaults.setValue(encodedData, forKey: memo.memoDateforAdmin)
             print("userdefault에 저장 완료")
-            updateMemoList(newMemoList: MainVC.list.memos){self.navigationController?.popViewController(animated: true)
+            var value = defaults.value(forKey: memo.memoDateforAdmin)
+            print(value)
+            updateMemoList(newMemoList: newDateArray, newData: memo){self.navigationController?.popViewController(animated: true)
                 self.navigationController?.popViewController(animated: true)
             }
         } catch {
             print("Unable to Encode/Decode Note due to \(error)")
         }
+        print("입력한 메모 추가된 날짜 리스트: \(memoDateList)")
+        
     }
     
     func recordNow() -> [String] {
@@ -113,17 +119,23 @@ class DetailVC: UIViewController {
         return [dateForAdmin, dateForUser]
     }
     
-    func updateMemoList(newMemoList: [Memo], completion: @escaping () -> Void){
+    func updateMemoList(newMemoList: [String], newData: Memo, completion: @escaping () -> Void){
         //날짜 옵셔널 바인딩
+        
         if newMemoList.count == memoDateList.count {
             print("리스트 길이 변함없음")
             completion()
         } else {
-            var obj = defaults.object(forKey: memoDateforAdmin)
-            var value = defaults.value(forKey: memoDateforUser)
-            MainVC.list.memos = newMemoList
+            memoDateList = newMemoList
+            do {
+                let data = try JSONSerialization.data(withJSONObject: memoDateList, options: [])
+                defaults.setValue(memoDateList, forKey: "memoDateList")
+                defaults.synchronize()
+                
+            } catch {
+                print("Unable to encode due to \(error)")
+            }
             
-            defaults.synchronize()
             print("길이 다름, 동기화 완료")
             completion()
         }
