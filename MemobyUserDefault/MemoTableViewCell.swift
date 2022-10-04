@@ -32,7 +32,7 @@ class MemoTableViewCell: UITableViewCell {
     var memoDateforAdmin: String?
     var memoDateforUsers: String?
     
-    var memoData: [String?] = []{
+    var memoData: Memo? {
         didSet {
             configureUIwithData()
         }
@@ -45,10 +45,10 @@ class MemoTableViewCell: UITableViewCell {
     
     //Read/Get Data
     func configureUIwithData() {
-        memoTitle = memoData[0]
-        memoContents = memoData[1]
-        memoDateforAdmin = memoData[2]
-        memoDateforUsers = memoData[3]
+        memoTitle = memoData?.memoTitle
+        memoContents = memoData?.memoContents
+        memoDateforAdmin = memoData?.memoDateforAdmin
+        memoDateforUsers = memoData?.memoDateforUser
         
         memoTitleLabel.text = memoTitle
         memoContentsLabel.text = memoContents
@@ -58,6 +58,7 @@ class MemoTableViewCell: UITableViewCell {
     @IBAction func tapUpdateButton(_ sender: Any) {
         // 뷰컨트롤로에서 전달받은 클로저를 실행 (내 자신 Cell을 전달하면서) 
         updateButtonPressed(self)
+//        performSegue(withIdentifier: "SegueToDeatailVC", sender: UIButton)
     }
     
     

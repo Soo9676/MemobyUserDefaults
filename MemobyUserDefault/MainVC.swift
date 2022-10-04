@@ -23,12 +23,7 @@ class MainVC: UIViewController {
         let defaults = UserDefaults.standard
         var strings = defaults.object(forKey: "memoDateList") as? [String] ?? []
         memoDateList = strings
-        
-//        do {
-//            if let jsonData = UserDefaults.standard.data(forKey: "memoDateList") {
-//                memoDateList = try JSONDecoder().decode(memoDateList, from: jsonData)
-//            }
-//        } catch { print(error)}
+//        memoContentsLabel.isHidden = true
 
         MemoTableView.reloadData()
     
@@ -54,19 +49,23 @@ extension MainVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "MemoCell", for: indexPath) as? MemoTableViewCell else {return UITableViewCell()}
         var keyDate = memoDateList[indexPath.row]
-        var decodedMemo: [Memo] = []
+        var memoStruct: Memo
         do {
-            if let jsonData = defaults.data(forKey: keyDate) {
-                decodedMemo = try JSONDecoder().decode(Memo, from: jsonData)
+            if let jsonString: String = defaults.value(forKey: keyDate) as? String{
+                if let jsonData = jsonString.data(using: .utf8){
+                    print("jsonData: \(jsonData)")
+                    
+                    memoStruct = try JSONDecoder().decode(Memo.self, from: jsonData)
+                    print("memoStruct: \(memoStruct)")
+                    //셀에 모델 전달
+                    cell.memoData = memoStruct
+                }
             }
         } catch { print("cell에서 \(error)때문에 decode 할 수 없음") }
-        defaults.value(forKey: keyDate) as? [String]
-        print("가져온 \(decodedMemo)")
+    
         
-//        var memoData = [decodedMemo.memoTitle, decodedMemo.memoContents, decodedMemo.memoDateforAdmin, decodedMemo.memoDateforUser]
+        cell.memoContentsLabel.isHidden = true
         cell.indexRow = indexPath.row
-        //셀에 모델 전달
-        cell.memoData = decodedMemo ?? []
         
         //셀의 update 버튼이 눌렸을때 작동할 클로저
         cell.updateButtonPressed = { [weak self] (senderCell) in
@@ -104,10 +103,14 @@ extension MainVC: UITableViewDelegate {
         if segue.identifier == "SegueToDeatailVC" {
             let detailVC = segue.destination as! DetailVC
             guard let indexPath = sender as? IndexPath else {return}
-            detailVC.memoDateList = self.memoDateList
-            print("디테일VC -> 메인VC : 메모날짜 리스트 전달 완료")
+//            detailVC.memoDateList = self.memoDateList
+            
+
             detailVC.indexRow = indexPath.row
+            detailVC.keyDate = memoDateList[indexPath.row]
+            print("keyDate 전달 완료")
         }
     }
+    
 }
 
